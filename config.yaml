@@ -1,0 +1,21 @@
+# odb-custom-field config
+
+odb_path: results.odb
+
+# Source fields to extract from ODB.
+# List specific fields or use ALL to extract everything.
+# Examples:
+#   sources: ALL
+#   sources: [S, U]
+#   sources: [S, U, E, MISES]
+sources:
+  - S
+  - U
+
+# Keep intermediate JSON files after pipeline finishes
+# Useful for inspection in Jupyter before manual inject
+keep_data: true
+
+# Abaqus command (full path if not on PATH)
+# abaqus_cmd: "C:\\SIMULIA\\Commands\\abaqus.bat"
+abaqus_cmd: abaqus
