@@ -1,6 +1,12 @@
 # odb-toolkit
 
-Custom `FieldOutput` in Abaqus ODB, computed in Python 3.
+**A pipeline for defining and injecting custom field outputs into Abaqus ODB files, with computations in Python 3.**
+
+## Comparison
+
+| Abaqus S11 | Custom MY\_S11 |
+|:---:|:---:|
+| ![S11 Abaqus](docs/s11_abaqus.png) | ![S11 Custom](docs/s11_custom.png) |
 
 ## Structure
 
