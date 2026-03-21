@@ -120,3 +120,7 @@ recalculating for every element.
 - Element fields with multiple integration points are averaged per element
 - `abaqus.bat` may return exit code 0 on errors — pipeline checks for expected output files
 - Add `.tmp/` to `.gitignore`
+
+## TODO
+
+- [ ] Export to VTK/PyVista for Abaqus-free post-processing ([PyVista docs](https://docs.pyvista.org))
