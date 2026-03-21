@@ -112,7 +112,7 @@ FIELD_DEFS = [
         'name': 'MY_VONMISES',
         'description': 'Custom von Mises stress',
         'sources': ['S'],
-        'position': 'element', # DEFAULT: 'element' if any(pos == 'element' for pos in positions.values()) else 'nodal' in compute.py
+        'position': 'element',
         'func': von_mises,
     },
     {

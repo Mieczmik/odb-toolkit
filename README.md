@@ -96,6 +96,24 @@ S = np.array(raw[step_1_part_1]['S']['data'])
 labels = raw[step_1_part_1]['S']['labels']
 ```
 
+## Global functions (cross-element)
+
+For computations that need data from all elements (e.g. normalizing
+by cross-section average), set `'global': True` in field definition.
+The function receives additional keyword arguments:
+```python
+def my_func(f, lookups=None, mesh=None, label=None):
+    # f        — current element's field data (same as regular func)
+    # lookups  — {'S': {label: data}, 'U': {label: data}, ...}
+    # mesh     — {'nodes': {id: [x,y,z]}, 'elements': {id: {connectivity, type}}}
+    # label    — current element/node label
+    ...
+```
+
+See `make_s11_normalized()` in `field_defs.py` for a factory pattern
+with caching — precomputes bin averages once per frame instead of
+recalculating for every element.
+
 ## Notes
 
 - Abaqus Py2 scripts use `str()` casts for JSON unicode compatibility
