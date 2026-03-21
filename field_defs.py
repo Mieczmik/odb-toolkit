@@ -35,6 +35,77 @@ def stress_disp_product(f):
     u_mag = math.sqrt(sum(ui**2 for ui in u))
     return mises * u_mag
 
+def s11_normalized(f, lookups=None, mesh=None, label=None):
+    """S11 normalized by mean S11 across elements at similar X coordinate.
+
+    Groups elements into 1mm-wide bins by centroid X,
+    computes mean S11 per bin, returns S11 / bin_mean.
+    """
+    if not mesh or not lookups or label is None:
+        return f['S'][0]
+
+    nodes = mesh.get('nodes', {})
+    elements = mesh.get('elements', {})
+    s_lookup = lookups.get('S', {})
+
+    # Centroid X of current element
+    conn = elements.get(str(label), {}).get('connectivity', [])
+    my_x = sum(nodes[str(n)][0] for n in conn if str(n) in nodes) / max(len(conn), 1)
+    bin_key = round(my_x, 0)
+
+    # Mean S11 across elements in the same X bin
+    total = 0.0
+    count = 0
+    for el_id, el_info in elements.items():
+        el_int = int(el_id)
+        if el_int not in s_lookup:
+            continue
+        c = el_info['connectivity']
+        cx = sum(nodes[str(n)][0] for n in c if str(n) in nodes) / max(len(c), 1)
+        if round(cx, 0) == bin_key:
+            total += s_lookup[el_int][0]
+            count += 1
+
+    slice_mean = total / count if count > 0 else 1.0
+    return f['S'][0] / slice_mean if slice_mean != 0 else 0.0
+
+def s11_normalized_with_cache(bin_size=1.0, axis=0):
+    cache = {}
+
+    def func(f, lookups=None, mesh=None, label=None):
+        if not mesh or not lookups or label is None:
+            return f['S'][0]
+
+        cache_key = id(lookups)
+        if cache_key not in cache:
+            from collections import defaultdict
+            nodes = mesh['nodes']
+            elements = mesh['elements']
+            s_lookup = lookups['S']
+
+            bins = defaultdict(list)
+            el_to_bin = {}
+            for el_id, el_info in elements.items():
+                el_int = int(el_id)
+                if el_int not in s_lookup:
+                    continue
+                conn = el_info['connectivity']
+                cx = sum(nodes[str(n)][axis] for n in conn) / len(conn)
+                bk = round(cx / bin_size) * bin_size
+                bins[bk].append(s_lookup[el_int][0])
+                el_to_bin[el_int] = bk
+
+            means = {}
+            for bk, vals in bins.items():
+                means[bk] = sum(vals) / len(vals)
+
+            cache[cache_key] = {el: means[bk] for el, bk in el_to_bin.items()}
+
+        mean = cache[cache_key].get(label, 1.0)
+        return f['S'][0] / mean if mean != 0 else 0.0
+
+    return func
+
 
 FIELD_DEFS = [
     {
@@ -64,5 +135,13 @@ FIELD_DEFS = [
         'sources': ['U'],
         'position': 'nodal',
         'func': u1,
+    },
+    {
+        'name': 'S11_NORMALIZED',
+        'description': 'S11 / mean S11 in X-slice',
+        'sources': ['S'],
+        'position': 'element',
+        'global': True,
+        'func': s11_normalized_with_cache(bin_size=1.0),
     },
 ]

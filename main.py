@@ -42,6 +42,10 @@ def main():
     args = p.parse_args()
 
     cfg = load_config(ROOT / args.config)
+    
+    if not Path(cfg['odb_path']).exists():
+        print(f"ERROR: ODB file not found: {cfg['odb_path']}")
+        sys.exit(1)
 
     # Resolve sources: list or "ALL"
     sources = cfg['sources']

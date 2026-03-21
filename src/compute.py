@@ -93,7 +93,10 @@ def compute_frame(frame_data: dict, mesh: dict | None = None) -> list[dict]:
             if skip:
                 continue
 
-            values.append(fdef['func'](fields_dict))
+            if fdef.get('global'):
+                values.append(fdef['func'](fields_dict, lookups=lookups, mesh=mesh, label=el))
+            else:
+                values.append(fdef['func'](fields_dict))
             labels.append(el)
 
         if not labels:
